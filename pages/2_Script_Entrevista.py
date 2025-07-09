@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 from io import BytesIO
+from databricks import sql
 
 st.set_page_config(page_title="Entrevista de Engajamento", layout="wide")
 
@@ -117,4 +118,58 @@ if st.button("Salvar Respostas"):
         )
 
         st.success("Respostas salvas com sucesso!")
+# ...existing code...
+
+# ...existing code...
+
+from databricks import sql
+
+# def enviar_para_databricks(df):
+#     # Substitua pelos seus dados do Databricks
+#     DATABRICKS_SERVER_HOSTNAME = "seu-workspace.cloud.databricks.com"
+#     DATABRICKS_HTTP_PATH = "/sql/1.0/warehouses/xxxxxxx"
+#     DATABRICKS_ACCESS_TOKEN = "dapiXXXXXXXXXXXXXXXXXXXXXXXX"
+
+#     # Conectando ao Databricks
+#     with sql.connect(
+#         server_hostname=DATABRICKS_SERVER_HOSTNAME,
+#         http_path=DATABRICKS_HTTP_PATH,
+#         access_token=DATABRICKS_ACCESS_TOKEN
+#     ) as connection:
+#         cursor = connection.cursor()
+#         # Crie a tabela se não existir
+#         cursor.execute("""
+#             CREATE TABLE IF NOT EXISTS entrevista_engajamento (
+#                 Pergunta STRING,
+#                 Resposta STRING,
+#                 Nota INT,
+#                 Candidato STRING,
+#                 Email STRING,
+#                 Cargo STRING,
+#                 Media_Engajamento DOUBLE
+#             )
+#         """)
+#         # Inserindo os dados linha a linha
+#         for _, row in df.iterrows():
+#             cursor.execute("""
+#                 INSERT INTO entrevista_engajamento (Pergunta, Resposta, Nota, Candidato, Email, Cargo, Media_Engajamento)
+#                 VALUES (?, ?, ?, ?, ?, ?, ?)
+#             """, (
+#                 row["Pergunta"],
+#                 row["Resposta"],
+#                 int(row["Nota"]),
+#                 row["Candidato"],
+#                 row["Email"],
+#                 row["Cargo"],
+#                 float(row["Média Engajamento"])
+#             ))
+#         cursor.close()
+
+# # ...dentro do bloco else, após salvar o Excel:
+#         try:
+#             enviar_para_databricks(df)
+#             st.success("Respostas salvas e enviadas para o Databricks com sucesso!")
+#         except Exception as e:
+#             st.error(f"Erro ao enviar para o Databricks: {e}")
+
 # ...existing code...
