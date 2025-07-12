@@ -1,0 +1,7 @@
+requests==2.32.3
+pandas==2.2.3
+plotly==6.0.1
+matplotlib==3.10.0
+xgboost==3.0.1
+yfinance==0.2.61
+numpy==2.1.3
