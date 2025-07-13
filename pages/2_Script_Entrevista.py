@@ -53,31 +53,33 @@ def avaliar_resposta(resposta):
     justificativa = []
     nota = 1
 
-    # Tamanho mínimo
     palavras = len(resposta.split())
     caracteres = len(resposta)
+
+    # Resposta curta
     if palavras < 30 or caracteres < 200:
         nota = 1
         justificativa.append("Resposta curta (menos de 30 palavras ou 200 caracteres).")
+    # Resposta vaga
+    elif any(vaga in resposta_lower for vaga in RESPOSTAS_VAGAS):
+        nota = 1
+        justificativa.append("Resposta vaga ou genérica.")
     else:
-        # Penaliza respostas vagas
-        if any(vaga in resposta_lower for vaga in RESPOSTAS_VAGAS):
-            nota = 1
-            justificativa.append("Resposta vaga ou genérica.")
-        else:
-            # Presença de palavras-chave
-            palavras_encontradas = [kw for kw in PALAVRAS_CHAVE if kw in resposta_lower]
-            if palavras_encontradas:
-                nota += 1
-                justificativa.append(f"Palavras-chave encontradas: {', '.join(palavras_encontradas)}.")
-            # Clareza e profundidade (simples heurística)
-            if len(resposta.split('.')) > 2:
-                nota += 1
-                justificativa.append("Resposta apresenta exemplos/reflexão.")
-            # Limita nota máxima
-            nota = min(nota, 5)
-            if nota >= 4:
-                justificativa.append("Resposta demonstra motivação, propósito ou experiência concreta.")
+        # Presença de palavras-chave
+        palavras_encontradas = [kw for kw in PALAVRAS_CHAVE if kw in resposta_lower]
+        if palavras_encontradas:
+            nota += 1
+            justificativa.append(f"Palavras-chave encontradas: {', '.join(palavras_encontradas)}.")
+        # Clareza e profundidade
+        if len(resposta.split('.')) > 2:
+            nota += 1
+            justificativa.append("Resposta apresenta exemplos/reflexão.")
+        # Motivação, propósito ou experiência concreta
+        if nota >= 3:
+            nota += 1
+            justificativa.append("Resposta demonstra motivação, propósito ou experiência concreta.")
+        # Limita nota máxima
+        nota = min(nota, 5)
 
     return nota, " ".join(justificativa)
 
