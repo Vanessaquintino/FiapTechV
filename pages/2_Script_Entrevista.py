@@ -103,21 +103,21 @@ for bloco, questoes in perguntas.items():
 
 def nivel_engajamento(media):
     if media <= 1:
-        return "Muito baixo engajamento"
+        return "Muito Baixo"
     elif media <= 2:
-        return "Baixo engajamento"
+        return "Baixo"
     elif media <= 3:
-        return "Engajamento moderado"
+        return "Moderado"
     elif media <= 4:
-        return "Alto engajamento"
+        return "Alto"
     else:
-        return "Altamente engajado"
+        return "Muito Alto"
 
 # Cálculo da média final
 media_engajamento = sum(notas.values()) / len(notas) if notas else 0
 nivel = nivel_engajamento(media_engajamento)
-st.metric("💡 Engajamento médio do candidato", f"{media_engajamento:.2f} / 5")
-st.caption(f"Nível: **{nivel}**")
+st.metric("💡 Nível de engajamento do candidato", f"{media_engajamento:.2f} / 5")
+st.caption(f"Nível de engajamento: **{nivel}**")
 
 
 #Salvar resultados
