@@ -122,8 +122,6 @@ if st.button("Salvar Respostas"):
 
 # ...existing code...
 
-from databricks import sql
-
 # def enviar_para_databricks(df):
 #     # Substitua pelos seus dados do Databricks
 #     DATABRICKS_SERVER_HOSTNAME = "seu-workspace.cloud.databricks.com"
