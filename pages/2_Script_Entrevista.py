@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 from io import BytesIO
-from databricks import sql
+# from databricks import sql
 
 st.set_page_config(page_title="Entrevista de Engajamento", layout="wide")
 
