@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 from io import BytesIO
-from databricks import sql
+# from databricks import sql
 
 st.set_page_config(page_title="Entrevista de Engajamento", layout="wide")
 
@@ -39,40 +39,85 @@ perguntas = {
     ]
 }
 
-respostas = {}
-notas = {}
+PALAVRAS_CHAVE = [
+    "impacto", "propósito", "contribuição", "crescimento", "iniciativa",
+    "time", "cultura", "evolução", "aprendizado", "motivação",
+    "pertencimento", "feedback"
+]
+RESPOSTAS_VAGAS = [
+    "cumprir tarefas", "gosto de trabalhar", "não sei", "não sei dizer", "não tenho"
+]
 
-# Critérios automáticos: quanto maior a resposta, maior a nota (de 1 a 5)
-def calcular_nota(resposta):
-    tamanho = len(resposta.strip())
-    if tamanho == 0:
-        return 1
-    elif tamanho < 50:
-        return 2
-    elif tamanho < 150:
-        return 3
-    elif tamanho < 300:
-        return 4
+def avaliar_resposta(resposta):
+    resposta_lower = resposta.lower()
+    justificativa = []
+    nota = 1
+
+    palavras = len(resposta.split())
+    caracteres = len(resposta)
+
+    # Resposta curta
+    if palavras < 30 or caracteres < 200:
+        nota = 1
+        justificativa.append("Resposta curta (menos de 30 palavras ou 200 caracteres).")
+    # Resposta vaga
+    elif any(vaga in resposta_lower for vaga in RESPOSTAS_VAGAS):
+        nota = 1
+        justificativa.append("Resposta vaga ou genérica.")
     else:
-        return 5
+        # Presença de palavras-chave
+        palavras_encontradas = [kw for kw in PALAVRAS_CHAVE if kw in resposta_lower]
+        if palavras_encontradas:
+            nota += 1
+            justificativa.append(f"Palavras-chave encontradas: {', '.join(palavras_encontradas)}.")
+        # Clareza e profundidade
+        if len(resposta.split('.')) > 2:
+            nota += 1
+            justificativa.append("Resposta apresenta exemplos/reflexão.")
+        # Motivação, propósito ou experiência concreta
+        if nota >= 3:
+            nota += 1
+            justificativa.append("Resposta demonstra motivação, propósito ou experiência concreta.")
+        # Limita nota máxima
+        nota = min(nota, 5)
+
+    return nota, " ".join(justificativa)
 
 # Coleta de respostas e notas
+respostas = {}
+notas = {}
+justificativas = {}
 for bloco, questoes in perguntas.items():
     st.subheader(f"🧩 {bloco}")
     for i, pergunta in enumerate(questoes):
         resposta = st.text_area(f"📌 {pergunta}", key=f"resp_{bloco}{i}")
         if resposta.strip():
-            nota = calcular_nota(resposta)
+            nota, justificativa = avaliar_resposta(resposta)
         else:
-            nota = 0
-        st.caption(f"Nota automática: {nota} / 5")  # Exibe a nota menor e abaixo
+            nota, justificativa = 0, "Sem resposta."
+        st.caption(f"Nota automática: {nota} / 5")
         respostas[pergunta] = resposta
         notas[pergunta] = nota
+        justificativas[pergunta] = justificativa
     st.markdown("---")
+
+def nivel_engajamento(media):
+    if media <= 1:
+        return "Muito Baixo"
+    elif media <= 2:
+        return "Baixo"
+    elif media <= 3:
+        return "Moderado"
+    elif media <= 4:
+        return "Alto"
+    else:
+        return "Muito Alto"
 
 # Cálculo da média final
 media_engajamento = sum(notas.values()) / len(notas) if notas else 0
-st.metric("💡 Engajamento médio do candidato", f"{media_engajamento:.2f} / 5")
+nivel = nivel_engajamento(media_engajamento)
+st.metric("💡 Nível de engajamento do candidato", f"{media_engajamento:.2f} / 5")
+st.caption(f"Nível de engajamento: **{nivel}**")
 
 
 #Salvar resultados
@@ -118,58 +163,4 @@ if st.button("Salvar Respostas"):
         )
 
         st.success("Respostas salvas com sucesso!")
-# ...existing code...
 
-# ...existing code...
-
-from databricks import sql
-
-# def enviar_para_databricks(df):
-#     # Substitua pelos seus dados do Databricks
-#     DATABRICKS_SERVER_HOSTNAME = "seu-workspace.cloud.databricks.com"
-#     DATABRICKS_HTTP_PATH = "/sql/1.0/warehouses/xxxxxxx"
-#     DATABRICKS_ACCESS_TOKEN = "dapiXXXXXXXXXXXXXXXXXXXXXXXX"
-
-#     # Conectando ao Databricks
-#     with sql.connect(
-#         server_hostname=DATABRICKS_SERVER_HOSTNAME,
-#         http_path=DATABRICKS_HTTP_PATH,
-#         access_token=DATABRICKS_ACCESS_TOKEN
-#     ) as connection:
-#         cursor = connection.cursor()
-#         # Crie a tabela se não existir
-#         cursor.execute("""
-#             CREATE TABLE IF NOT EXISTS entrevista_engajamento (
-#                 Pergunta STRING,
-#                 Resposta STRING,
-#                 Nota INT,
-#                 Candidato STRING,
-#                 Email STRING,
-#                 Cargo STRING,
-#                 Media_Engajamento DOUBLE
-#             )
-#         """)
-#         # Inserindo os dados linha a linha
-#         for _, row in df.iterrows():
-#             cursor.execute("""
-#                 INSERT INTO entrevista_engajamento (Pergunta, Resposta, Nota, Candidato, Email, Cargo, Media_Engajamento)
-#                 VALUES (?, ?, ?, ?, ?, ?, ?)
-#             """, (
-#                 row["Pergunta"],
-#                 row["Resposta"],
-#                 int(row["Nota"]),
-#                 row["Candidato"],
-#                 row["Email"],
-#                 row["Cargo"],
-#                 float(row["Média Engajamento"])
-#             ))
-#         cursor.close()
-
-# # ...dentro do bloco else, após salvar o Excel:
-#         try:
-#             enviar_para_databricks(df)
-#             st.success("Respostas salvas e enviadas para o Databricks com sucesso!")
-#         except Exception as e:
-#             st.error(f"Erro ao enviar para o Databricks: {e}")
-
-# ...existing code...
