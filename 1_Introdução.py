@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 from io import BytesIO
 
-st.title("Bem-vindo!!")
+st.title("Bem-vindo (a))!!")
 st.markdown("""
 Para o desenvolvimento desta proposta, iniciamos com uma análise criteriosa e um entendimento aprofundado das informações contidas nas bases fornecidas. A partir disso, estruturamos o trabalho em **três fases principais de entrega**:
 
