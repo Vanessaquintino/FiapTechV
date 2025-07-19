@@ -3,12 +3,19 @@ from sklearn.metrics.pairwise import cosine_similarity
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.feature_extraction.text import TfidfVectorizer
+import streamlit as st
 
-df_candidatos = pd.read_csv('candidatos_final.csv')  
-df_vagas = pd.read_csv('vagas_final.csv')
+df_candidatos = pd.read_csv('pages/candidatos_final.csv', on_bad_lines='skip', sep=';') 
+df_vagas = pd.read_csv('pages/vagas_final.csv', on_bad_lines='skip', sep=';')
 
-print(df_candidatos.columns)
-print(df_vagas.columns)
+# Exibição lúdica das colunas
+col1, col2 = st.columns(2)
+with col1:
+    st.markdown("### 🧑‍💼 Info Candidatos")
+    st.code('\n'.join(df_candidatos.columns.tolist()), language='python')
+with col2:
+    st.markdown("### 💼 Info Vagas")
+    st.code('\n'.join(df_vagas.columns.tolist()), language='python')
 
 # Criar texto consolidado do candidato
 df_candidatos['perfil_texto'] = (
@@ -46,8 +53,8 @@ titulo_vaga_escolhida = "Desenvolvedor SAP SD - 713"  # substitua pelo título d
 # Filtrar a vaga pelo título original
 vaga_filtrada = df_vagas[df_vagas['titulo_original'] == titulo_vaga_escolhida]
 if vaga_filtrada.empty:
-    print("Vaga não encontrada!")
-    exit()
+    st.error("Vaga não encontrada!")
+    st.stop()
 vaga = vaga_filtrada.iloc[0]
 texto_vaga = vaga['texto_vaga']
 id_vaga_escolhida = vaga['id_todos_digitos']  # pega o id correto da vaga filtrada
@@ -57,12 +64,14 @@ indices, scores = ranquear_candidatos(texto_vaga, df_candidatos['perfil_texto'].
 top_candidatos = df_candidatos.iloc[indices].copy()
 top_candidatos['score_aderencia'] = scores
 
-# Mostrar resultado
+# Mostrar resultado no Streamlit
 colunas_necessarias = ['codigo_profissional', 'nome', 'perfil_texto', 'score_aderencia']
 for coluna in colunas_necessarias:
     if coluna not in top_candidatos.columns:
-        print(f"Coluna '{coluna}' não encontrada em df_candidatos.")
-print(top_candidatos[colunas_necessarias])
+        st.warning(f"Coluna '{coluna}' não encontrada em df_candidatos.")
+
+st.subheader(f'Top 5 Candidatos para a Vaga {id_vaga_escolhida}')
+st.dataframe(top_candidatos[colunas_necessarias])
 
 # Criar o gráfico de barras horizontais
 plt.figure(figsize=(10, 6))
@@ -77,3 +86,6 @@ plt.xlabel('Score de Aderência')
 plt.ylabel('Nome do Candidato')
 plt.xlim(0, 1)
 plt.tight_layout()
+
+# Exibir gráfico no Streamlit
+st.pyplot(plt)
