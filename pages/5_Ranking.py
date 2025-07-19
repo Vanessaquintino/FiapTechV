@@ -1,8 +1,8 @@
 import pandas as pd
-from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import matplotlib.pyplot as plt
 import seaborn as sns
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 df_candidatos = pd.read_csv('candidatos_final.csv')  
 df_vagas = pd.read_csv('vagas_final.csv')
